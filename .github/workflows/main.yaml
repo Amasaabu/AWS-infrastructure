@@ -1,0 +1,100 @@
+name: AWS infrastructure CDK
+permissions:
+  id-token: write
+  contents: write
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request: {}
+
+jobs:
+  test:
+    name: Cynth!!
+    runs-on: ubuntu-latest
+    env:
+      VPC_ID: ${{ secrets.VPC_ID }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      KEY_PAIR_ID: ${{ secrets.KEY_PAIR_ID }}
+      KEY_PAIR_NAME: ${{ secrets.KEY_PAIR_NAME }}
+      REGION: ${{ secrets.REGION }}
+      ACCOUNT: ${{ secrets.ACCOUNT }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActionsCDKDeploy
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          # cache: "npm"
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: Synthesize CDK
+        run: cdk synth
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    name: Deploy CDK changes
+    runs-on: ubuntu-latest
+    env:
+      VPC_ID: ${{ secrets.VPC_ID }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      KEY_PAIR_ID: ${{ secrets.KEY_PAIR_ID }}
+      KEY_PAIR_NAME: ${{ secrets.KEY_PAIR_NAME }}
+      REGION: ${{ secrets.REGION }}
+      ACCOUNT: ${{ secrets.ACCOUNT }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActionsCDKDeploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          # cache: "npm"
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Synthesize CDK
+        run: cdk synth --verbose
+
+      - name: Deploy CDK
+        run: cdk deploy --require-approval never
