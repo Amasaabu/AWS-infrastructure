@@ -63,7 +63,7 @@ jobs:
       SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
       KEY_PAIR_ID: ${{ secrets.KEY_PAIR_ID }}
       KEY_PAIR_NAME: ${{ secrets.KEY_PAIR_NAME }}
-      REGION: ${{ secrets.REGION }}
+      REGION: ${{ secrets.AWS_REGION }}
       ACCOUNT: ${{ secrets.ACCOUNT }}
 
     steps:
