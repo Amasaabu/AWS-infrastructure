@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 20
       - name: setup python
-        uses: actions/python@v4
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           cache: "pip"
