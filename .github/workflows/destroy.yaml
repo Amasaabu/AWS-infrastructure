@@ -19,6 +19,8 @@ jobs:
       ACCOUNT: ${{ secrets.ACCOUNT }}
 
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v5
       - name: Setup nodejs
         uses: actions/setup-node@v5
         with:
