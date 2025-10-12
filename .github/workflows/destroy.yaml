@@ -1,0 +1,47 @@
+name: Destroy NodeKubedmCdk
+permissions:
+  id-token: write
+  contents: write
+on:
+  workflow_dispatch: {}
+
+jobs:
+  destroy:
+    name: Destroy Running Node
+    runs-on: ubuntu-latest
+    env:
+      VPC_ID: ${{ secrets.VPC_ID }}
+      SUBNET_ID: ${{ secrets.SUBNET_ID }}
+      SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+      KEY_PAIR_ID: ${{ secrets.KEY_PAIR_ID }}
+      KEY_PAIR_NAME: ${{ secrets.KEY_PAIR_NAME }}
+      REGION: ${{ secrets.AWS_REGION }}
+      ACCOUNT: ${{ secrets.ACCOUNT }}
+
+    steps:
+      - name: Setup nodejs
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - name: setup python
+        uses: actions/python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActionsCDKDeploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Destroy Node
+        run: cdk destroy Node3Kubedm --require-approval never
