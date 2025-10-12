@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 
 # Bash script to join master node via kubeadm
 # This script assumes you have already set up a Kubernetes master node
