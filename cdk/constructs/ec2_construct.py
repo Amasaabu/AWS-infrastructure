@@ -32,7 +32,7 @@ class Ec2InstanceConstruct(Construct):
                 with open(BASE_DIR, "r", encoding="utf-8") as f:
                     self.instance.add_user_data(f.read())
             except Exception as e:
-                raise Exception(e)
+                raise Exception(f"Failed to read user data file {BASE_DIR}: {e}") from e
 
 
         # Add user data .sh script from file
