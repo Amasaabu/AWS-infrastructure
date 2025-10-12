@@ -18,7 +18,7 @@ class Ec2InstanceConstruct(Construct):
             vpc=vpc,
             security_group=security_group,
             instance_type=ec2.InstanceType("t3.micro"),
-            machine_image=ec2.MachineImage.from_ssm_parameter(f"/aws/service/canonical/ubuntu/server/${ubuntu_version}/stable/current/amd64/hvm/ebs-gp2/ami-id", os=ec2.OperatingSystemType.LINUX),
+            machine_image=ec2.MachineImage.from_ssm_parameter(f"/aws/service/canonical/ubuntu/server/{ubuntu_version}/stable/current/amd64/hvm/ebs-gp2/ami-id", os=ec2.OperatingSystemType.LINUX),
             key_pair=ec2.KeyPair.from_key_pair_name(self, id=ssh_key_id, key_pair_name=ssh_key_pair_name),
             vpc_subnets=subnet,
             block_devices=[ec2.BlockDevice(
