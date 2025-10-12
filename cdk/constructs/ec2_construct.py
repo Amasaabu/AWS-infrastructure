@@ -10,13 +10,15 @@ class Ec2InstanceConstruct(Construct):
     def __init__(self, scope: Construct, id: str, vpc, security_group, instance_name: str, ssh_key_id: str, ssh_key_pair_name: str, subnet=None, abs_path_to_user_data: str=None, **kwargs):
         super().__init__(scope, id, **kwargs)
         # Create EC2 instance using existing VPC and SG
+
+        ubuntu_version = "noble" 
         self.instance = ec2.Instance(
             self, "Ec2Instance",
             instance_name=instance_name,
             vpc=vpc,
             security_group=security_group,
             instance_type=ec2.InstanceType("t3.micro"),
-            machine_image=ec2.MachineImage.from_ssm_parameter("/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id", os=ec2.OperatingSystemType.LINUX),
+            machine_image=ec2.MachineImage.from_ssm_parameter(f"/aws/service/canonical/ubuntu/server/${ubuntu_version}/stable/current/amd64/hvm/ebs-gp2/ami-id", os=ec2.OperatingSystemType.LINUX),
             key_pair=ec2.KeyPair.from_key_pair_name(self, id=ssh_key_id, key_pair_name=ssh_key_pair_name),
             vpc_subnets=subnet,
             block_devices=[ec2.BlockDevice(
