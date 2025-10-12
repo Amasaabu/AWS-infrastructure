@@ -28,10 +28,8 @@ class Ec2InstanceConstruct(Construct):
 
         if abs_path_to_user_data!=None:
             BASE_DIR = Path(__file__).parent.parent.parent / abs_path_to_user_data
-            config_path = BASE_DIR
-            print("File*****" + abs_path_to_user_data)
             try:
-                with open(config_path, "r") as f:
+                with open(BASE_DIR, "r", encoding="utf-8") as f:
                     self.instance.add_user_data(f.read())
             except Exception as e:
                 raise Exception(e)
