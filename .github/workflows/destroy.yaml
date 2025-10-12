@@ -46,4 +46,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Destroy Node
-        run: cdk destroy Node3Kubedm --require-approval never
+        run: cdk destroy Node3Kubedm --force
