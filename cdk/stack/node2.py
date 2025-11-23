@@ -27,7 +27,7 @@ class Node2Ec2Instance(Stack):
 
         Ec2InstanceConstruct(self, "Node3", vpc, worker_kubedm_sg, "Node2-kubedm", load_value_frm_config("KEY_PAIR_ID"), load_value_frm_config("KEY_PAIR_NAME"), subnet=subnet_selection, abs_path_to_user_data="utils/setup.sh" )
     
-        # The code that defines your stack goes here
+        # The code that defines your stack goews here
 
         # example resource
         # queue = sqs.Queue(
