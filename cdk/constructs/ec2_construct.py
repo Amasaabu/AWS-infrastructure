@@ -23,7 +23,7 @@ class Ec2InstanceConstruct(Construct):
             vpc_subnets=subnet,
             block_devices=[ec2.BlockDevice(
                 device_name="/dev/sda1",
-                volume=ec2.BlockDeviceVolume.ebs(31, volume_type=ec2.EbsDeviceVolumeType.GP3, delete_on_termination=True),
+                volume=ec2.BlockDeviceVolume.ebs(40, volume_type=ec2.EbsDeviceVolumeType.GP3, delete_on_termination=True),
             )],
             role=None
         )
