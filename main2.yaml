@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to create a Mac Dedicated Host
+Resources:
+  HostResourceGroup:
+    Type: "AWS::ResourceGroups::Group"
+    Properties:
+      Name: mac-ci-resource-group
+      Configuration:
+        - Type: "AWS::EC2::HostManagement"
+          Parameters:
+            - Name: "allowed-host-based-license-configurations"
+              Values: arn:aws:license-manager:us-east-1:451613728407:license-configuration:lic-f6cd7e8a8c232877f59153cdd8a53076
+            - Name: "allowed-host-families"
+              Values: ["mac2"]
+            - Name: "auto-release-hosts"
+              Values: ["true"]
+            - Name: "auto-allocate-hosts"
+              Values: ["true"]
+        - Type: "AWS::ResourceGroups::Generic"
+          Parameters:
+            - Name: "allowed-resource-types"
+              Values: ["AWS::EC2::Host"]
+            - Name: "deletion-protection"
+              Values: ["true"]
+  # --------------------------------------------------------------
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: mac-ci-security-group
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+          # DestinationPrefixListId: String
+          # DestinationSecurityGroupId: String
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: SSH access
+          # SourcePrefixListId: String
+          # SourceSecurityGroupId: String
+      Tags:
+        - Key: Name
+          Value: mac-ci-security-group
+        - Key: Project
+          Value: MacCI
+      VpcId: vpc-0c383a2640aff49c4
+  #--------------------------------------------------------------
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        Placement:
+          Affinity: host
+          AvailabilityZone: us-east-1a
+          HostResourceGroupArn: !Ref HostResourceGroup
+          Tenancy: host
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              DeleteOnTermination: true
+              Encrypted: false
+              Iops: 5000
+              VolumeSize: 200
+              VolumeType: gp3
+        # CapacityReservationSpecification:
+        #   HostResourceGroupArn: !GetAtt HostResourceGroup.HostResourceGroupArn
+        # DisableApiStop: Boolean
+        # DisableApiTermination: Boolean
+        ImageId: ami-0193f7d87beb71749
+        InstanceInitiatedShutdownBehavior: stop
+        InstanceType: mac2.metal
+        KeyName: macci
+        # LicenseSpecifications:
+        #   - LicenseConfigurationArn: !GetAtt LicenceConfiguration.LicenseConfigurationArn
+        Monitoring:
+          Enabled: true
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        # TagSpecifications:
+        #   - TagSpecification
+        # UserData: String
+      LaunchTemplateName: mac-ci-launch-template
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: mac-ci-launch-template
+            - Key: Project
+              Value: MacCI
+  # --------------------------------------------------------------
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: mac-ci-auto-scaling-group
+      # AvailabilityZoneDistribution:
+      #   AvailabilityZoneDistribution
+      # AvailabilityZoneImpairmentPolicy:
+      #   AvailabilityZoneImpairmentPolicy
+      AvailabilityZones:
+        - us-east-1a
+      # Cooldown: 300 # in seconds
+      # DefaultInstanceWarmup: Integer
+      DesiredCapacity: 0
+      # HealthCheckGracePeriod: Integer
+      HealthCheckType: EC2
+      # InstanceId: String
+      # InstanceMaintenancePolicy:
+      #   InstanceMaintenancePolicy
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize: 0
+      # MetricsCollection:
+      #   - MetricsCollection
+      MinSize: 0
+      # NotificationConfigurations:
+      #   - NotificationConfiguration
+      Tags:
+        - Key: Name
+          Value: mac-ci
+          PropagateAtLaunch: true
+        - Key: Project
+          Value: MacCI
+          PropagateAtLaunch: true
+      TerminationPolicies:
+        - String
+      # TrafficSources:
+      #   - TrafficSourceIdentifier
+      # VPCZoneIdentifier:
+      #   - String
+# --------------------------------------------------------------
+# MacDedicatedHost:
+#   Type: AWS::EC2::Host
+#   Properties:
+#     AutoPlacement: 'off'  # has to be 'off' for mac instances, EC2 mac must run on a single-tenant host
+#     AvailabilityZone: eu-west-1a
+#     HostMaintenance: 'on'
+#     HostRecovery: 'off'
+#     InstanceFamily: mac2 #Affinity to mac2 family
+#     InstanceType: mac2.metal #Affinity to mac2.metal instances
+#     HostResourceGroupArn: !Ref HostResourceGroup
+#     Tags:
+#       - Key: Name
+#         Value: mac-dedicated-host
+#       - Key: Project
+#         Value: MacCI

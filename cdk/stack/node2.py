@@ -25,7 +25,7 @@ class Node2Ec2Instance(Stack):
         worker_kubedm_sg= ec2.SecurityGroup.from_security_group_id(self, "kubed_sg", security_group_id=load_value_frm_config("SECURITY_GROUP_ID"))
         
 
-        Ec2InstanceConstruct(self, "Node3", vpc, worker_kubedm_sg, "Node2-kubedm", load_value_frm_config("KEY_PAIR_ID"), load_value_frm_config("KEY_PAIR_NAME"), subnet=subnet_selection, abs_path_to_user_data="utils/setup.sh" )
+        Ec2InstanceConstruct(self, "Node3dem", vpc, worker_kubedm_sg, "Node2-kubedm", load_value_frm_config("KEY_PAIR_ID"), load_value_frm_config("KEY_PAIR_NAME"), subnet=subnet_selection, abs_path_to_user_data="utils/setup.sh" )
     
         # The code that defines your stack goews here
 
